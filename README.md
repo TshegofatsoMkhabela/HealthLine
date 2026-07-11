@@ -15,6 +15,7 @@ Think an "Uber" service re-engineered for South African realities: a split publi
 **Constraints.** Government ambulances can't be dispatched by software, POPIA keeps medical data on-device, hospitals have no integration point, GPS fails indoors and in settlements, and abuse must be blocked at identity check.
  
 **Solution.** One orchestration app that verifies identity, carries a doctor-signed profile, resolves location in two layers, routes across private or public EMS, and hands off records by scan, built on tools South Africa already has.
+
 ---
 
 ## How It Works
