@@ -8,50 +8,13 @@ Think an "Uber" service re-engineered for South African realities: a split publi
 
 ## Executive Summary
 
-### Current state: where we are today
-
-South Africa's Emergency Medical Services (EMS), the ambulances and paramedics, run as two disconnected tiers: an overstretched public service reached on `10177`, and fast but fragmented private fleets (Netcare 911, ER24, and independents).
-
-The public tier is in a documented crisis:
-
-* Roughly **4,000 ambulances against a need of ~6,000** (a shortfall of about 2,000), and staffing shortages leave many that exist parked.
-* In KwaZulu-Natal's 2025/26 figures, only about **28% of life-threatening urban calls** were reached within the 30-minute target.
-
-And four failures cost lives regardless of how many ambulances exist:
-
-| # | Failure | Why it happens |
-|---|---|---|
-| 1 | **Can't find the patient** | GPS gives a street address, which is useless in an unmapped settlement or on the 3rd floor of an office park. |
-| 2 | **Dispatcher gets bad information** | Panicked callers over-report symptoms (*over-triage*), so scarce ambulances get sent to the wrong calls. |
-| 3 | **Ambulance arrives "blind"** | No medical history travels with the patient, and the nearest hospital may be *on diversion* (casualty ward full and turning patients away). |
-| 4 | **Anyone can call** | Anonymous requests invite prank calls that clog an already overloaded system. |
-
-### Goal state: what we want it to be
-
-A trust-and-routing layer on top of the existing system, not a replacement, that:
-
-* Confirms the requester is a **real, verified person** (no prank calls).
-* Hands the responder a **clinically-verified medical summary** before they arrive.
-* Finds the patient **indoors and outdoors**, with or without a street address.
-* Dispatches the **closest** responder, whoever owns the ambulance.
-* Pre-warms the **right hospital** so a bed is ready on arrival.
-
-### Constraints: the hard boundaries we design around
-
-| Constraint | What it forces |
-|---|---|
-| Government ambulances **can't be dispatched by software** | The public path produces a structured report plus human approval, not an automatic dispatch. |
-| **POPIA** (Protection of Personal Information Act) requires *data minimization*, collecting only what is needed | Medical data stays **on the user's phone**; only a minimal subset ever leaves it. |
-| Hospitals run **legacy systems with no way to plug in** | Records are handed over by scan-and-transfer, writing nothing to hospital servers. |
-| GPS **fails** in settlements and indoors | A two-layer location system is mandatory, not optional. |
-| Prank calls and abuse | Identity is checked against the national registry before anything else happens. |
-
-### Solution: the idea in one line
-
-> Verified identity, then a portable doctor-signed medical profile, then two-layer location, then smart routing (private or public), then hospital pre-arrival, then scan-based records handoff.
-
-Crucially, we do **not** build ambulances, biometrics, or fleet software; South Africa already has those. We orchestrate existing pieces: national identity checks, the **AURA** private-dispatch network, **what3words** addressing (which names any 3m x 3m square on Earth with three words, e.g. `///apple.tree.dog`), and indoor positioning.
-
+**Current state.** South Africa's EMS runs as two disconnected tiers, public and private, with the public side short roughly 2,000 ambulances and reaching only 28% of urban calls in time, while patients go unfound, ambulances arrive blind, and prank calls clog the system.
+ 
+**Goal state.** We want a trust-and-routing layer that verifies the requester, gives responders a verified medical summary, locates the patient anywhere, dispatches the closest ambulance, and pre-warms the right hospital.
+ 
+**Constraints.** Government ambulances can't be dispatched by software, POPIA keeps medical data on-device, hospitals have no integration point, GPS fails indoors and in settlements, and abuse must be blocked at identity check.
+ 
+**Solution.** One orchestration app that verifies identity, carries a doctor-signed profile, resolves location in two layers, routes across private or public EMS, and hands off records by scan, built on tools South Africa already has.
 ---
 
 ## How It Works
