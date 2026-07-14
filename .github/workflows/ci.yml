@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: backend (lint, build, test, image)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: healthline
+          POSTGRES_USER: healthline
+          POSTGRES_PASSWORD: ci_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Lint
+        working-directory: backend
+        run: mvn -B -ntp spotless:check
+
+      - name: Build and test
+        working-directory: backend
+        run: mvn -B -ntp verify
+
+      - name: Build Docker image
+        run: docker build -t healthline-backend:ci ./backend
+
+      - name: Smoke-test the built image against a real Postgres
+        run: |
+          docker run -d --network host --name backend-ci \
+            -e DATABASE_URL="postgresql://healthline:ci_test_password@localhost:5432/healthline" \
+            -e PORT=8080 \
+            healthline-backend:ci
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8080/health && exit 0
+            sleep 1
+          done
+          echo "backend /health never became ready" >&2
+          docker logs backend-ci
+          exit 1
+
+      - name: Stop backend container
+        if: always()
+        run: docker rm -f backend-ci || true
+
+  ai-service:
+    name: ai-service (lint, build, test, image)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          # requirements-dev.txt pulls in requirements.txt via "-r requirements.txt" — cache
+          # hashing doesn't follow that include, so both files must be listed explicitly or a
+          # version bump in requirements.txt alone won't invalidate the cache.
+          cache-dependency-path: |
+            ai-service/requirements.txt
+            ai-service/requirements-dev.txt
+
+      - name: Install dependencies
+        working-directory: ai-service
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint
+        working-directory: ai-service
+        run: ruff check .
+
+      - name: Test
+        working-directory: ai-service
+        run: python -m pytest tests/ -v
+
+      - name: Build Docker image
+        run: docker build -t healthline-ai-service:ci ./ai-service
+
+      - name: Smoke-test the built image
+        run: |
+          docker run -d --name ai-service-ci -p 8000:8000 healthline-ai-service:ci
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8000/health && exit 0
+            sleep 1
+          done
+          echo "ai-service /health never became ready" >&2
+          docker logs ai-service-ci
+          exit 1
+
+      - name: Stop ai-service container
+        if: always()
+        run: docker rm -f ai-service-ci || true
