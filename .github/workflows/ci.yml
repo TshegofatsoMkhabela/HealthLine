@@ -95,7 +95,7 @@ jobs:
 
       - name: Test
         working-directory: ai-service
-        run: pytest tests/ -v
+        run: python -m pytest tests/ -v
 
       - name: Build Docker image
         run: docker build -t healthline-ai-service:ci ./ai-service
