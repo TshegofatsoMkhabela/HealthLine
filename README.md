@@ -85,6 +85,32 @@ The languages split cleanly by job: **React** owns the experience, **Java** owns
 
 ---
 
+## Quick Start
+
+**Prerequisites:** Docker · Python 3.13 · (optional) JDK 21 + Maven — Docker substitutes for
+these if you don't have them installed locally.
+
+**Backend** (`backend/`, Spring Boot):
+```bash
+cd backend
+mvn verify                                                              # with local JDK 21
+docker run --rm -v "$(pwd):/app" -w /app maven:3.9-eclipse-temurin-21 mvn verify   # without
+```
+
+**AI service** (`ai-service/`, FastAPI):
+```bash
+cd ai-service
+python -m venv .venv && .venv/Scripts/activate    # .venv/bin/activate on macOS/Linux
+pip install -r requirements-dev.txt
+pytest tests/ -v
+uvicorn app.main:app --reload                      # → http://localhost:8000/health
+```
+
+Windows Git Bash: if a `docker run -v` command errors on the path, prefix it with
+`MSYS_NO_PATHCONV=1`.
+
+---
+
 ## Impact
 
 Who it helps, and how it is measured:
