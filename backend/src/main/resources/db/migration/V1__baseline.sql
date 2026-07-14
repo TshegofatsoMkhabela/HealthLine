@@ -1,0 +1,5 @@
+-- Baseline migration: no tables yet (Issue 0 has no @Entity classes).
+-- Its purpose is to give Flyway a schema history to own from the start, so the first
+-- migration that adds a real table (Issue 3 onward) is additive, not a bootstrap problem.
+-- Flyway runs this before Hibernate's ddl-auto=validate checks the schema, so the two
+-- stay in sync: Flyway owns schema changes, Hibernate only ever verifies against them.
