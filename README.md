@@ -102,7 +102,7 @@ docker run --rm -v "$(pwd):/app" -w /app maven:3.9-eclipse-temurin-21 mvn verify
 cd ai-service
 python -m venv .venv && .venv/Scripts/activate    # .venv/bin/activate on macOS/Linux
 pip install -r requirements-dev.txt
-pytest tests/ -v
+python -m pytest tests/ -v
 uvicorn app.main:app --reload                      # → http://localhost:8000/health
 ```
 
