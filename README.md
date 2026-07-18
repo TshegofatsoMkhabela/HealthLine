@@ -96,13 +96,13 @@ these if you don't have them installed locally.
 docker compose up --build
 ```
 
-Starts all three containers together — `backend` on `:8081`, `ai-service` on `:8000`, plus a
+Starts all three containers together — `backend` on `:8080`, `ai-service` on `:8000`, plus a
 throwaway local `postgres` — wired to each other automatically. Verify:
 
 ```bash
-curl http://localhost:8081/health
+curl http://localhost:8080/health
 
-curl -X POST http://localhost:8081/api/emergency/trigger \
+curl -X POST http://localhost:8080/api/emergency/trigger \
   -H "Content-Type: application/json" \
   -d '{"triagePayload":{"age":21,"bloodType":"AB+","allergies":["Penicillin"],"medications":[],"chronicConditions":[],"specialNeeds":[]},"location":{"plusCode":null}}'
 ```
