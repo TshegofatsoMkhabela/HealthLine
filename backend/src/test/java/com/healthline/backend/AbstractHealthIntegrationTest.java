@@ -14,12 +14,12 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Shared wiring for integration tests: same boot mode, same profile, same "hit a path on this
- * running instance" helpers. Test-specific setup (extra profiles, property overrides) stays on each
- * subclass.
+ * running instance" helpers. Test-specific setup (extra profiles, property overrides) stays on
+ * each subclass.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-abstract class AbstractHealthIntegrationTest {
+public abstract class AbstractHealthIntegrationTest {
 
   @LocalServerPort private int port;
 
@@ -37,8 +37,8 @@ abstract class AbstractHealthIntegrationTest {
     return rest.getForEntity("http://localhost:" + port + path, responseType);
   }
 
-  protected ResponseEntity<java.util.Map> postForEntity(String path, Object body) {
-    return rest.postForEntity("http://localhost:" + port + path, body, java.util.Map.class);
+  protected ResponseEntity<Map> postForEntity(String path, Object body) {
+    return rest.postForEntity("http://localhost:" + port + path, body, Map.class);
   }
 
   protected <T> ResponseEntity<T> exchange(
