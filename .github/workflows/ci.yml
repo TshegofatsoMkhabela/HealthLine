@@ -114,3 +114,98 @@ jobs:
       - name: Stop ai-service container
         if: always()
         run: docker rm -f ai-service-ci || true
+
+  identity-integration:
+    name: identity integration (backend <-> ai-service, real HTTP)
+    runs-on: ubuntu-latest
+    needs: [backend, ai-service]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: healthline
+          POSTGRES_USER: healthline
+          POSTGRES_PASSWORD: ci_test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t healthline-backend:ci ./backend
+
+      - name: Build ai-service image
+        run: docker build -t healthline-ai-service:ci ./ai-service
+
+      # IDENTITY_MODEL_STUB swaps DeepFace for a deterministic fake embedding (see
+      # ai-service/app/identity.py) so this job proves the real backend<->ai-service
+      # HTTP/JSON contract without installing DeepFace/tensorflow or needing real face
+      # images — the model's own accuracy is out of scope here, already established by
+      # research/deepface-login-recheck.md's cited benchmarks and ai-service's own
+      # mocked unit tests.
+      - name: Start ai-service with the deterministic identity stub
+        run: |
+          docker run -d --network host --name ai-service-ci \
+            -e PORT=8000 \
+            -e IDENTITY_MODEL_STUB=true \
+            healthline-ai-service:ci
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8000/health && exit 0
+            sleep 1
+          done
+          echo "ai-service /health never became ready" >&2
+          docker logs ai-service-ci
+          exit 1
+
+      - name: Start backend pointed at ai-service
+        run: |
+          docker run -d --network host --name backend-ci \
+            -e DATABASE_URL="postgresql://healthline:ci_test_password@localhost:5432/healthline" \
+            -e PORT=8080 \
+            -e AI_SERVICE_BASE_URL="http://localhost:8000" \
+            healthline-backend:ci
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8080/health && exit 0
+            sleep 1
+          done
+          echo "backend /health never became ready" >&2
+          docker logs backend-ci
+          exit 1
+
+      - name: Enroll, then recheck with the same selfie (expect a match)
+        run: |
+          ENROLL_RESPONSE=$(curl -sf -X POST http://localhost:8080/api/identity/enroll \
+            -H "Content-Type: application/json" \
+            -d '{"idNumber": "0000000000000", "selfieBlob": "cGVyc29uLWE="}')
+          echo "$ENROLL_RESPONSE"
+          echo "$ENROLL_RESPONSE" | grep -q '"status":"verified"' || { echo "enroll did not verify" >&2; exit 1; }
+
+          IDENTITY_ID=$(echo "$ENROLL_RESPONSE" | grep -o '"identityId":"[^"]*"' | cut -d'"' -f4)
+
+          RECHECK_MATCH=$(curl -sf -X POST http://localhost:8080/api/identity/recheck \
+            -H "Content-Type: application/json" \
+            -d "{\"identityId\": \"$IDENTITY_ID\", \"selfieBlob\": \"cGVyc29uLWE=\"}")
+          echo "$RECHECK_MATCH"
+          echo "$RECHECK_MATCH" | grep -q '"match":true' || { echo "same-selfie recheck did not match" >&2; exit 1; }
+
+      - name: Recheck with a different selfie (expect no match, not an error)
+        run: |
+          ENROLL_RESPONSE=$(curl -sf -X POST http://localhost:8080/api/identity/enroll \
+            -H "Content-Type: application/json" \
+            -d '{"idNumber": "1111111111111", "selfieBlob": "cGVyc29uLWE="}')
+          IDENTITY_ID=$(echo "$ENROLL_RESPONSE" | grep -o '"identityId":"[^"]*"' | cut -d'"' -f4)
+
+          RECHECK_NO_MATCH=$(curl -sf -X POST http://localhost:8080/api/identity/recheck \
+            -H "Content-Type: application/json" \
+            -d "{\"identityId\": \"$IDENTITY_ID\", \"selfieBlob\": \"cGVyc29uLWI=\"}")
+          echo "$RECHECK_NO_MATCH"
+          echo "$RECHECK_NO_MATCH" | grep -q '"match":false' || { echo "different-selfie recheck matched (should not have)" >&2; exit 1; }
+
+      - name: Stop containers
+        if: always()
+        run: docker rm -f backend-ci ai-service-ci || true
