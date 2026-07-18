@@ -36,9 +36,10 @@ class DispatchService {
     this.notifier = notifier;
   }
 
-  Dispatch trigger(TriagePayload triagePayload) {
+  Dispatch trigger(TriagePayload triagePayload, LocationPayload location) {
     String dispatchId = UUID.randomUUID().toString();
-    Dispatch dispatch = new Dispatch(dispatchId, Instant.now().plus(CANCEL_WINDOW), triagePayload);
+    Dispatch dispatch =
+        new Dispatch(dispatchId, Instant.now().plus(CANCEL_WINDOW), triagePayload, location);
     dispatches.put(dispatchId, dispatch);
     var future =
         scheduler.schedule(

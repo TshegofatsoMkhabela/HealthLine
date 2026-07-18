@@ -25,7 +25,7 @@ class DispatchController {
     if (request.triagePayload() == null || !request.triagePayload().hasValidBloodType()) {
       return ResponseEntity.badRequest().build();
     }
-    Dispatch dispatch = dispatchService.trigger(request.triagePayload());
+    Dispatch dispatch = dispatchService.trigger(request.triagePayload(), request.location());
     URI location = URI.create("/api/emergency/" + dispatch.getDispatchId());
     return ResponseEntity.created(location).body(DispatchResponseMapper.toBody(dispatch));
   }

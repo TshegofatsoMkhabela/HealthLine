@@ -13,15 +13,21 @@ class Dispatch {
   private final String dispatchId;
   private final Instant cancelWindowExpiresAt;
   private final TriagePayload triagePayload;
+  private final LocationPayload location;
   private DispatchStatus status = DispatchStatus.PENDING;
   private ScheduledFuture<?> pendingTransition;
   private String priorityCode;
   private String aiSummary;
 
-  Dispatch(String dispatchId, Instant cancelWindowExpiresAt, TriagePayload triagePayload) {
+  Dispatch(
+      String dispatchId,
+      Instant cancelWindowExpiresAt,
+      TriagePayload triagePayload,
+      LocationPayload location) {
     this.dispatchId = dispatchId;
     this.cancelWindowExpiresAt = cancelWindowExpiresAt;
     this.triagePayload = triagePayload;
+    this.location = location;
   }
 
   String getDispatchId() {
@@ -34,6 +40,10 @@ class Dispatch {
 
   TriagePayload getTriagePayload() {
     return triagePayload;
+  }
+
+  LocationPayload getLocation() {
+    return location;
   }
 
   synchronized DispatchStatus getStatus() {
