@@ -90,6 +90,32 @@ The languages split cleanly by job: **React** owns the experience, **Java** owns
 **Prerequisites:** Docker · Python 3.13 · (optional) JDK 21 + Maven — Docker substitutes for
 these if you don't have them installed locally.
 
+### Run it locally
+
+```bash
+docker compose up --build
+```
+
+Starts all three containers together — `backend` on `:8081`, `ai-service` on `:8000`, plus a
+throwaway local `postgres` — wired to each other automatically. Verify:
+
+```bash
+curl http://localhost:8081/health
+
+curl -X POST http://localhost:8081/api/emergency/trigger \
+  -H "Content-Type: application/json" \
+  -d '{"triagePayload":{"age":21,"bloodType":"AB+","allergies":["Penicillin"],"medications":[],"chronicConditions":[],"specialNeeds":[]},"location":{"plusCode":null}}'
+```
+
+Returns a `201` with a `dispatchId` — poll `GET /api/emergency/<dispatchId>`: `PENDING`
+immediately, `DISPATCHED` with a real AI-generated summary after ~5s (since `ai-service` is
+reachable via compose).
+
+`.env.example` documents the env vars Render's dashboard sets in production — not needed for
+the compose path above.
+
+### Build and test each service in isolation
+
 **Backend** (`backend/`, Spring Boot):
 ```bash
 cd backend

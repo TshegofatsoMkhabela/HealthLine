@@ -1,0 +1,33 @@
+# Local-dev only. Uses a real (throwaway, unpersisted) Postgres container rather than H2 —
+# application-test.properties lives in src/test/resources, which Maven never bundles into the
+# packaged production JAR, so SPRING_PROFILES_ACTIVE=test has no backing config once the app is
+# actually built and run as an artifact (only works under `mvn test`'s own classpath). Postgres
+# also matches Render/Supabase's actual shape, which H2 never did anyway.
+# See research/build-instructions-convention.md.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: healthline
+      POSTGRES_PASSWORD: healthline
+      POSTGRES_DB: healthline
+    ports:
+      - "5433:5432"
+
+  ai-service:
+    build: ./ai-service
+    ports:
+      - "8000:8000"
+
+  backend:
+    build: ./backend
+    ports:
+      - "8081:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/healthline
+      DATABASE_USER: healthline
+      DATABASE_PASSWORD: healthline
+      AI_SERVICE_BASE_URL: http://ai-service:8000
+    depends_on:
+      - postgres
+      - ai-service
