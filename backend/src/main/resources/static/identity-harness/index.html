@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Identity Test Harness — Issue 2</title>
+  </head>
+  <body>
+    <h1>Identity test harness</h1>
+    <p>
+      Bare-bones harness for Issue 2 (login, biometrics, eKYC) — not a demo-ready
+      screen, matches Issue 1's steel-thread precedent. Served from <code>backend</code>
+      itself so API calls are same-origin (no CORS setup needed).
+    </p>
+
+    <section>
+      <h2>Enroll</h2>
+      <label>SA ID number: <input id="idNumber" maxlength="13" placeholder="0000000000000" /></label>
+      <br />
+      <video id="enrollVideo" autoplay playsinline width="320" height="240"></video>
+      <br />
+      <button id="enableCameraBtn">Enable camera</button>
+      <button id="enrollBtn" disabled>Capture &amp; enroll</button>
+      <pre id="enrollResult"></pre>
+    </section>
+
+    <section>
+      <h2>Login (recheck)</h2>
+      <label>Identity ID: <input id="identityId" placeholder="filled in after enroll" /></label>
+      <br />
+      <button id="loginBtn">Login</button>
+      <pre id="loginResult"></pre>
+    </section>
+
+    <script>
+      let enrollStream = null;
+      const enrollVideo = document.getElementById("enrollVideo");
+
+      function captureFrameAsBase64(video) {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+        return canvas.toDataURL("image/jpeg").split(",")[1];
+      }
+
+      document.getElementById("enableCameraBtn").onclick = async () => {
+        enrollStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        enrollVideo.srcObject = enrollStream;
+        document.getElementById("enrollBtn").disabled = false;
+      };
+
+      document.getElementById("enrollBtn").onclick = async () => {
+        const idNumber = document.getElementById("idNumber").value;
+        const selfieBlob = captureFrameAsBase64(enrollVideo);
+
+        const response = await fetch("/api/identity/enroll", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idNumber, selfieBlob }),
+        });
+        const body = await response.json();
+        document.getElementById("enrollResult").textContent = JSON.stringify(body, null, 2);
+        if (body.identityId) {
+          document.getElementById("identityId").value = body.identityId;
+        }
+      };
+
+      // Explicit Login button: opens the camera fresh on click and captures a live
+      // frame, rather than auto-triggering on page load — matches the accepted
+      // login-recheck design (live capture only, no additional liveness challenge;
+      // see research/deepface-login-recheck.md).
+      document.getElementById("loginBtn").onclick = async () => {
+        const identityId = document.getElementById("identityId").value;
+        const loginStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const loginVideo = document.createElement("video");
+        loginVideo.autoplay = true;
+        loginVideo.playsInline = true;
+        loginVideo.srcObject = loginStream;
+        await new Promise((resolve) => (loginVideo.onloadedmetadata = resolve));
+        // Give the stream a frame to actually render before capturing.
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        const selfieBlob = captureFrameAsBase64(loginVideo);
+        loginStream.getTracks().forEach((track) => track.stop());
+
+        const response = await fetch("/api/identity/recheck", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identityId, selfieBlob }),
+        });
+        const body = await response.json();
+        document.getElementById("loginResult").textContent = JSON.stringify(body, null, 2);
+      };
+    </script>
+  </body>
+</html>
