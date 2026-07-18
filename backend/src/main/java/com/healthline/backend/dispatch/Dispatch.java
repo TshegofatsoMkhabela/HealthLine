@@ -7,6 +7,14 @@ import java.util.concurrent.ScheduledFuture;
  * In-memory record of one dispatch's lifecycle. Mutable and access is synchronized on the instance
  * because both the triggering request thread and the scheduler's delayed-transition thread can
  * touch the same dispatch (a cancel racing the window's expiry).
+ *
+ * <p>getStatus()/getPriorityCode()/getAiSummary() are synchronized per-getter, not under one
+ * combined read — that's only coherent for a multi-field reader (e.g. DispatchResponseMapper)
+ * because markDispatchedIfStillPending() is the sole writer of priorityCode/aiSummary, writes both
+ * alongside status in the same synchronized block, and nothing ever un-sets them afterward. If a
+ * future transition needs to overwrite priorityCode/aiSummary again after DISPATCHED (e.g. an
+ * EN_ROUTE update), per-field locking stops being safe and reads need a single combined lock or an
+ * immutable snapshot swapped via one field instead.
  */
 class Dispatch {
 

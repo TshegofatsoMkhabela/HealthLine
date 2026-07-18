@@ -3,8 +3,6 @@ package com.healthline.backend;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -76,18 +74,5 @@ class WebSocketPushIntegrationTest extends AbstractHealthIntegrationTest {
     assertThat(message).isNotNull();
     assertThat(message.get("dispatchId")).isEqualTo(dispatchId);
     assertThat(message.get("status")).isEqualTo("CANCELLED");
-  }
-
-  private Map<String, Object> validTriagePayload() {
-    return Map.of(
-        "triagePayload",
-            Map.of(
-                "age", 21,
-                "bloodType", "AB+",
-                "allergies", List.of(),
-                "medications", List.of(),
-                "chronicConditions", List.of(),
-                "specialNeeds", List.of()),
-        "location", Collections.singletonMap("plusCode", null));
   }
 }

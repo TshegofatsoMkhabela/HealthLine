@@ -1,5 +1,9 @@
 package com.healthline.backend;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -41,5 +45,27 @@ abstract class AbstractHealthIntegrationTest {
       String path, HttpMethod method, Object body, Class<T> responseType) {
     HttpEntity<Object> entity = new HttpEntity<>(body);
     return rest.exchange("http://localhost:" + port + path, method, entity, responseType);
+  }
+
+  /**
+   * A valid trigger payload with sensible empty-list defaults for every triagePayload field —
+   * override only what a given test actually cares about, e.g. {@code
+   * validTriagePayload(Map.of("allergies", List.of("Penicillin")))}.
+   */
+  protected Map<String, Object> validTriagePayload(Map<String, Object> triagePayloadOverrides) {
+    Map<String, Object> triagePayload = new LinkedHashMap<>();
+    triagePayload.put("age", 21);
+    triagePayload.put("bloodType", "AB+");
+    triagePayload.put("allergies", List.of());
+    triagePayload.put("medications", List.of());
+    triagePayload.put("chronicConditions", List.of());
+    triagePayload.put("specialNeeds", List.of());
+    triagePayload.putAll(triagePayloadOverrides);
+    return Map.of(
+        "triagePayload", triagePayload, "location", Collections.singletonMap("plusCode", null));
+  }
+
+  protected Map<String, Object> validTriagePayload() {
+    return validTriagePayload(Map.of());
   }
 }

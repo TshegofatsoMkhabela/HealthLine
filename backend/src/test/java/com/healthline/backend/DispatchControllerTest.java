@@ -17,23 +17,19 @@ import org.springframework.http.ResponseEntity;
  */
 class DispatchControllerTest extends AbstractHealthIntegrationTest {
 
-  private Map<String, Object> validTriagePayload() {
-    return Map.of(
-        "triagePayload",
-            Map.of(
-                "age", 21,
-                "bloodType", "AB+",
-                "allergies", List.of("Penicillin", "Peanuts"),
-                "medications", List.of("Metformin 500mg"),
-                "chronicConditions", List.of("Type 2 Diabetes"),
-                "specialNeeds", List.of("Wheelchair")),
-        "location", Collections.singletonMap("plusCode", null));
+  private Map<String, Object> fullTriagePayload() {
+    return validTriagePayload(
+        Map.of(
+            "allergies", List.of("Penicillin", "Peanuts"),
+            "medications", List.of("Metformin 500mg"),
+            "chronicConditions", List.of("Type 2 Diabetes"),
+            "specialNeeds", List.of("Wheelchair")));
   }
 
   @SuppressWarnings("unchecked")
   @Test
   void triggerReturns201WithPendingStatusAndCancelWindow() {
-    ResponseEntity<Map> response = postForEntity("/api/emergency/trigger", validTriagePayload());
+    ResponseEntity<Map> response = postForEntity("/api/emergency/trigger", fullTriagePayload());
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     assertThat(response.getHeaders().getLocation()).isNotNull();

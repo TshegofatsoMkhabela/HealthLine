@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import com.healthline.backend.dispatch.AiServiceClient;
 import com.healthline.backend.dispatch.TriageSummaryResult;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -23,19 +22,6 @@ class AiTriageIntegrationTest extends AbstractHealthIntegrationTest {
 
   @MockBean private AiServiceClient aiServiceClient;
 
-  private Map<String, Object> validTriagePayload() {
-    return Map.of(
-        "triagePayload",
-            Map.of(
-                "age", 21,
-                "bloodType", "AB+",
-                "allergies", List.of("Penicillin"),
-                "medications", List.of(),
-                "chronicConditions", List.of(),
-                "specialNeeds", List.of()),
-        "location", Collections.singletonMap("plusCode", null));
-  }
-
   @SuppressWarnings("unchecked")
   @Test
   void dispatchedResponseCarriesRealAiSummaryAndPriorityCode() throws InterruptedException {
@@ -44,7 +30,10 @@ class AiTriageIntegrationTest extends AbstractHealthIntegrationTest {
             new TriageSummaryResult("21yo, AB+ — CRITICAL: Penicillin allergy", "CODE_RED"));
 
     Map<String, Object> triggerBody =
-        postForEntity("/api/emergency/trigger", validTriagePayload()).getBody();
+        postForEntity(
+                "/api/emergency/trigger",
+                validTriagePayload(Map.of("allergies", List.of("Penicillin"))))
+            .getBody();
     String dispatchId = (String) triggerBody.get("dispatchId");
 
     Thread.sleep(6000);
