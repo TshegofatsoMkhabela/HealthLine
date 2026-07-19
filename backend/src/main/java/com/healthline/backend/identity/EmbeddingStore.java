@@ -32,12 +32,12 @@ public class EmbeddingStore {
    *
    * <p>{@code @Transactional} keeps the read and write below in one Hibernate session and one DB
    * connection — it does NOT close the race window (Postgres's default READ COMMITTED isolation
-   * still lets two concurrent calls both see "not found" before either commits). The find-then-insert
-   * still isn't atomic (two concurrent enrolls for the same idNumber — e.g. a client retry after a
-   * slow response — can both see "not found" and both attempt to insert). What actually stops a
-   * duplicate row is the DB's UNIQUE(id_number) constraint; the catch below turns the losing
-   * request's constraint violation into the same successful outcome the winning request got,
-   * instead of a raw 500.
+   * still lets two concurrent calls both see "not found" before either commits). The
+   * find-then-insert still isn't atomic (two concurrent enrolls for the same idNumber — e.g. a
+   * client retry after a slow response — can both see "not found" and both attempt to insert). What
+   * actually stops a duplicate row is the DB's UNIQUE(id_number) constraint; the catch below turns
+   * the losing request's constraint violation into the same successful outcome the winning request
+   * got, instead of a raw 500.
    */
   @Transactional
   public String enrollOrReenroll(String idNumber, List<Double> embedding) {

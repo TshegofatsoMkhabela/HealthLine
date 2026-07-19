@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 
 /**
- * Two near-simultaneous enrollOrReenroll calls for the same idNumber can both pass the
- * "not found" check before either commits its insert (enrollOrReenroll isn't atomic —
- * each repository call is its own transaction). The loser must adopt the winner's
- * identity, not crash. A real race is timing-dependent and unsuitable for a deterministic
- * test, so this uses a mocked repository to force the exact interleaving instead.
+ * Two near-simultaneous enrollOrReenroll calls for the same idNumber can both pass the "not found"
+ * check before either commits its insert (enrollOrReenroll isn't atomic — each repository call is
+ * its own transaction). The loser must adopt the winner's identity, not crash. A real race is
+ * timing-dependent and unsuitable for a deterministic test, so this uses a mocked repository to
+ * force the exact interleaving instead.
  */
 class EmbeddingStoreRaceTest {
 
