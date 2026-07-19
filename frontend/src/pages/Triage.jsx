@@ -4,6 +4,7 @@ import { useApp } from "../state/AppContext";
 import { TRIAGE_QUESTIONS, scorePriority } from "../services/triage";
 import PriorityBadge from "../components/PriorityBadge";
 import Card from "../components/Card";
+import PageHeader from "../components/PageHeader";
 
 export default function Triage() {
   const { update } = useApp();
@@ -28,10 +29,7 @@ export default function Triage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-xl font-semibold">Quick triage</h1>
-        <p className="text-mist text-sm mt-1">Tap answers. No typing.</p>
-      </div>
+      <PageHeader title="Quick triage" subtitle="Tap answers. No typing." />
 
       <div className="flex flex-col gap-3">
         {TRIAGE_QUESTIONS.map((q) => (

@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import Card from "../components/Card";
+import PageHeader from "../components/PageHeader";
 
 export default function Home() {
   const { state } = useApp();
@@ -9,12 +10,11 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-2xl font-semibold">Medical Passport</h1>
-        <p className="text-mist text-sm mt-1">
-          Verified identity. Paramedic-ready record. One button.
-        </p>
-      </div>
+      <PageHeader
+        title="Medical Passport"
+        subtitle="Verified identity. Paramedic-ready record. One button."
+        size="2xl"
+      />
 
       {!isSetUp && (
         <Card className="border-signal-amber/40 bg-signal-amber/5">

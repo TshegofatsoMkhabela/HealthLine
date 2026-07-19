@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useApp } from "../state/AppContext";
 import Card from "../components/Card";
+import PageHeader from "../components/PageHeader";
 
 const QR_LIFETIME_SECONDS = 60;
 
@@ -35,13 +36,15 @@ export default function Handoff() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-xl font-semibold">Handoff at the hospital</h1>
-        <p className="text-mist text-sm mt-1">
-          Full record transfers on scan, then disappears. No hospital
-          integration required.
-        </p>
-      </div>
+      <PageHeader
+        title="Handoff at the hospital"
+        subtitle={
+          <>
+            Full record transfers on scan, then disappears. No hospital
+            integration required.
+          </>
+        }
+      />
 
       <Card className="flex flex-col items-center gap-4">
         {selfDestructed ? (

@@ -4,6 +4,7 @@ import Map, { Marker } from "react-map-gl/mapbox";
 import { useApp } from "../state/AppContext";
 import { resolveWhat3Words, getBrowserLocation, getIndoorPosition } from "../services/location";
 import Card from "../components/Card";
+import PageHeader from "../components/PageHeader";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -57,12 +58,10 @@ export default function Locate() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-xl font-semibold">Locating you</h1>
-        <p className="text-mist text-sm mt-1">
-          GPS first. what3words or indoor positioning if that fails.
-        </p>
-      </div>
+      <PageHeader
+        title="Locating you"
+        subtitle="GPS first. what3words or indoor positioning if that fails."
+      />
 
       <Card className="h-56 overflow-hidden p-0">
         {state.location.indoorMode ? (

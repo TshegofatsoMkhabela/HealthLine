@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import { verifyIdentity } from "../services/identity";
 import Card from "../components/Card";
+import PageHeader from "../components/PageHeader";
 
 export default function Onboarding() {
   const { update } = useApp();
@@ -44,12 +45,10 @@ export default function Onboarding() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-xl font-semibold">Verify your identity</h1>
-        <p className="text-mist text-sm mt-1">
-          Checked against the DHA registry via Smile ID. Done once, ever.
-        </p>
-      </div>
+      <PageHeader
+        title="Verify your identity"
+        subtitle="Checked against the DHA registry via Smile ID. Done once, ever."
+      />
 
       <Card className="flex flex-col gap-4">
         <label className="flex flex-col gap-1.5">

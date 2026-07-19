@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { findAcceptingHospital } from "../services/dispatch";
 import Card from "../components/Card";
+import PageHeader from "../components/PageHeader";
 
 export default function HospitalBoard() {
   const navigate = useNavigate();
@@ -13,12 +14,10 @@ export default function HospitalBoard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-xl font-semibold">Hospital load-balancer</h1>
-        <p className="text-mist text-sm mt-1">
-          Skips any ward on diversion. Ward is alerted 3km out.
-        </p>
-      </div>
+      <PageHeader
+        title="Hospital load-balancer"
+        subtitle="Skips any ward on diversion. Ward is alerted 3km out."
+      />
 
       <div className="flex flex-col gap-3">
         {!data && <p className="text-sm text-mist font-mono">Checking hospital status…</p>}

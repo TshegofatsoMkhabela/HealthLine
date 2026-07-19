@@ -3,6 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { useApp } from "../state/AppContext";
 import { requestDoctorSignOff } from "../services/profile";
 import Card from "../components/Card";
+import PageHeader from "../components/PageHeader";
 
 export default function DoctorSign() {
   const { state, update } = useApp();
@@ -33,13 +34,15 @@ export default function DoctorSign() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-xl font-semibold">Get clinically verified</h1>
-        <p className="text-mist text-sm mt-1">
-          Optional, but a doctor's signature gives paramedics a green checkmark
-          they can treat on without hesitation.
-        </p>
-      </div>
+      <PageHeader
+        title="Get clinically verified"
+        subtitle={
+          <>
+            Optional, but a doctor's signature gives paramedics a green checkmark
+            they can treat on without hesitation.
+          </>
+        }
+      />
 
       <Card className="flex flex-col items-center gap-4">
         <div className="rounded-lg bg-paper p-4">

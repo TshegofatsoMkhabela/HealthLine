@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import { saveProfile } from "../services/profile";
 import Card from "../components/Card";
+import PageHeader from "../components/PageHeader";
 
 function Field({ label, value, onChange, placeholder }) {
   return (
@@ -40,12 +41,10 @@ export default function ProfileBuilder() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-xl font-semibold">Build your medical profile</h1>
-        <p className="text-mist text-sm mt-1">
-          Stored encrypted, on your device only — POPIA compliant by design.
-        </p>
-      </div>
+      <PageHeader
+        title="Build your medical profile"
+        subtitle="Stored encrypted, on your device only — POPIA compliant by design."
+      />
 
       <Card className="flex flex-col gap-4">
         <p className="text-xs font-mono uppercase tracking-wide text-signal-amber">
