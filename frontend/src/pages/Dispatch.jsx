@@ -1,14 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../state/AppContext";
 import { routeEmergency } from "../services/dispatch";
 import Card from "../components/Card";
 import PriorityBadge from "../components/PriorityBadge";
+import PageHeader from "../components/PageHeader";
 
 export default function Dispatch() {
   const { state, update } = useApp();
   const navigate = useNavigate();
-  const [routing, setRouting] = useState(true);
+  const routing = state.dispatch.status !== "en-route";
+  // Mirrors dispatch.etaMinutes for the countdown interval below — the interval
+  // closure can't read AppContext's `state` directly (it's captured once, at
+  // mount, by the effect's empty dep array) so it decrements this ref instead
+  // and writes the result back into context each tick.
+  const etaRef = useRef(null);
 
   useEffect(() => {
     let interval;
@@ -22,10 +28,11 @@ export default function Dispatch() {
       update("dispatch.provider", result.provider);
       update("dispatch.etaMinutes", result.etaMinutes);
       update("dispatch.status", "en-route");
-      setRouting(false);
+      etaRef.current = result.etaMinutes;
 
       interval = setInterval(() => {
-        update("dispatch.etaMinutes", Math.max(0, state.dispatch.etaMinutes - 1));
+        etaRef.current = Math.max(0, etaRef.current - 1);
+        update("dispatch.etaMinutes", etaRef.current);
       }, 60000);
     })();
 
@@ -37,12 +44,10 @@ export default function Dispatch() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="font-display text-xl font-semibold">Dispatch</h1>
-        <p className="text-mist text-sm mt-1">
-          {routing ? "Finding the fastest available responder…" : "Help is on the way."}
-        </p>
-      </div>
+      <PageHeader
+        title="Dispatch"
+        subtitle={routing ? "Finding the fastest available responder…" : "Help is on the way."}
+      />
 
       <Card className="flex flex-col items-center gap-4">
         <PriorityBadge code={priorityCode} label={priorityLabel} />
