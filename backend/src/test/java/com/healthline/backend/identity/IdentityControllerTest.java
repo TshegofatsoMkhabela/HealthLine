@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 
 // Each test uses its own distinct idNumber. Requests here go through a real HTTP call
 // (postForEntity, RANDOM_PORT) handled by a separate Tomcat thread, so @Transactional
@@ -67,7 +68,8 @@ class IdentityControllerTest extends AbstractHealthIntegrationTest {
 
   @Test
   void enrollReturns503WithoutStoringAnythingWhenTheAiServiceFails() {
-    when(aiServiceClient.embed(anyString())).thenThrow(new RuntimeException("connection refused"));
+    when(aiServiceClient.embed(anyString()))
+        .thenThrow(new RestClientException("connection refused"));
 
     ResponseEntity<Map> response =
         postForEntity(
@@ -147,7 +149,7 @@ class IdentityControllerTest extends AbstractHealthIntegrationTest {
     when(aiServiceClient.embed(anyString())).thenReturn(EMBEDDING);
     String identityId = enrollAndGetIdentityId("1000000000007");
     when(aiServiceClient.compare(anyString(), any()))
-        .thenThrow(new RuntimeException("connection refused"));
+        .thenThrow(new RestClientException("connection refused"));
 
     ResponseEntity<Map> response =
         postForEntity(

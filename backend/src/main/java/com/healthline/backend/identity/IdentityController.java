@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClientException;
 
 @RestController
 @RequestMapping("/api/identity")
@@ -75,11 +76,16 @@ class IdentityController {
             request.identityId(), result.get().match(), result.get().distance()));
   }
 
-  /** ai-service being briefly unreachable (cold start, network blip) is expected, not a bug. */
+  /**
+   * ai-service being briefly unreachable (cold start, network blip) is expected, not a bug. Catches
+   * RestClientException specifically, not RuntimeException broadly, so a real bug in
+   * IdentityAiServiceHttpClient (e.g. a NullPointerException from a malformed response) surfaces as
+   * a failure instead of silently reading as "ai-service is just unavailable."
+   */
   private <T> Optional<T> callAiService(Supplier<T> call) {
     try {
       return Optional.of(call.get());
-    } catch (RuntimeException e) {
+    } catch (RestClientException e) {
       return Optional.empty();
     }
   }
