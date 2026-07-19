@@ -9,6 +9,13 @@ ai-service/**/__pycache__/
 ai-service/.pytest_cache/
 ai-service/.ruff_cache/
 
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+npm-debug.log*
+
 # Env
 .env
 .env.local
