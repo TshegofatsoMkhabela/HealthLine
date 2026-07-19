@@ -55,8 +55,17 @@ export function AppProvider({ children }) {
       const next = structuredClone(prev);
       const keys = path.split(".");
       let node = next;
-      for (let i = 0; i < keys.length - 1; i++) node = node[keys[i]];
-      node[keys[keys.length - 1]] = value;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (node == null || typeof node !== "object" || !(keys[i] in node)) {
+          throw new Error(`update("${path}", ...): "${keys.slice(0, i + 1).join(".")}" doesn't exist in state.`);
+        }
+        node = node[keys[i]];
+      }
+      const lastKey = keys[keys.length - 1];
+      if (node == null || typeof node !== "object" || !(lastKey in node)) {
+        throw new Error(`update("${path}", ...): "${path}" doesn't exist in state — check for a typo.`);
+      }
+      node[lastKey] = value;
       return next;
     });
   };
