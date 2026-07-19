@@ -81,8 +81,7 @@ class IdentityControllerTest extends AbstractHealthIntegrationTest {
   @Test
   void enrollWithInvalidIdIsRejectedAndNeverCallsTheAiService() {
     ResponseEntity<Map> response =
-        postForEntity(
-            "/api/identity/enroll", Map.of("idNumber", "123", "selfieBlob", "selfie"));
+        postForEntity("/api/identity/enroll", Map.of("idNumber", "123", "selfieBlob", "selfie"));
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().get("status")).isEqualTo("rejected");
@@ -98,8 +97,7 @@ class IdentityControllerTest extends AbstractHealthIntegrationTest {
 
     ResponseEntity<Map> response =
         postForEntity(
-            "/api/identity/recheck",
-            Map.of("identityId", identityId, "selfieBlob", "new-selfie"));
+            "/api/identity/recheck", Map.of("identityId", identityId, "selfieBlob", "new-selfie"));
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(response.getBody().get("match")).isEqualTo(true);

@@ -42,7 +42,8 @@ class RestTemplateConfigTest {
       acceptButNeverRespond.start();
 
       long start = System.currentTimeMillis();
-      assertThatThrownBy(() -> restTemplate.getForEntity("http://localhost:" + port + "/", String.class))
+      assertThatThrownBy(
+              () -> restTemplate.getForEntity("http://localhost:" + port + "/", String.class))
           .isInstanceOf(ResourceAccessException.class);
       long elapsedMs = System.currentTimeMillis() - start;
 

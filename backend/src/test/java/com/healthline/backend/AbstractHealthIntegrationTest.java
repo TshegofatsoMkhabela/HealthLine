@@ -14,8 +14,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Shared wiring for integration tests: same boot mode, same profile, same "hit a path on this
- * running instance" helpers. Test-specific setup (extra profiles, property overrides) stays on
- * each subclass.
+ * running instance" helpers. Test-specific setup (extra profiles, property overrides) stays on each
+ * subclass.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

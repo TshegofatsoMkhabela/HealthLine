@@ -73,9 +73,9 @@ class IdentityAiServiceHttpClientTest {
     mockServer
         .expect(requestTo(BASE_URL + "/identity/compare"))
         .andExpect(
-            content()
-                .json("{\"selfieBlob\": \"selfie-bytes\", \"storedEmbedding\": [0.1, 0.2]}"))
-        .andRespond(withSuccess("{\"match\": true, \"distance\": 0.0}", MediaType.APPLICATION_JSON));
+            content().json("{\"selfieBlob\": \"selfie-bytes\", \"storedEmbedding\": [0.1, 0.2]}"))
+        .andRespond(
+            withSuccess("{\"match\": true, \"distance\": 0.0}", MediaType.APPLICATION_JSON));
 
     client.compare("selfie-bytes", List.of(0.1, 0.2));
 
