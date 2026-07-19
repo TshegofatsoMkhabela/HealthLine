@@ -19,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-abstract class AbstractHealthIntegrationTest {
+public abstract class AbstractHealthIntegrationTest {
 
   @LocalServerPort private int port;
 
@@ -37,14 +37,14 @@ abstract class AbstractHealthIntegrationTest {
     return rest.getForEntity("http://localhost:" + port + path, responseType);
   }
 
-  protected ResponseEntity<java.util.Map> postForEntity(String path, Object body) {
-    return rest.postForEntity("http://localhost:" + port + path, body, java.util.Map.class);
-  }
-
   protected <T> ResponseEntity<T> exchange(
       String path, HttpMethod method, Object body, Class<T> responseType) {
     HttpEntity<Object> entity = new HttpEntity<>(body);
     return rest.exchange("http://localhost:" + port + path, method, entity, responseType);
+  }
+
+  protected ResponseEntity<Map> postForEntity(String path, Object body) {
+    return exchange(path, HttpMethod.POST, body, Map.class);
   }
 
   /**

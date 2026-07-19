@@ -1,7 +1,37 @@
+import logging
+import os
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-app = FastAPI(title="HealthLine AI Triage Service")
+from app.identity import EMBEDDING_MODEL, MODEL_STUB_ENV_VAR
+from app.identity import router as identity_router
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Load the face-recognition model once at startup rather than on the first
+    # real request, so a request doesn't eat the model-load cost on top of
+    # Render's own cold-start latency (see research/deepface-login-recheck.md).
+    if os.environ.get(MODEL_STUB_ENV_VAR) == "true":
+        logger.info("IDENTITY_MODEL_STUB=true — skipping real model warm-load")
+    else:
+        try:
+            from deepface import DeepFace
+
+            DeepFace.build_model(EMBEDDING_MODEL)
+        except ImportError:
+            logger.warning(
+                "deepface not installed — skipping model warm-load (expected in tests)"
+            )
+    yield
+
+
+app = FastAPI(title="HealthLine AI Triage Service", lifespan=lifespan)
+app.include_router(identity_router)
 
 
 class TriagePayload(BaseModel):

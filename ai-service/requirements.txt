@@ -1,2 +1,14 @@
 fastapi==0.115.0
 uvicorn[standard]==0.31.0
+deepface==0.0.93
+numpy==2.1.3
+pillow==10.4.0
+# Pinned below 5.x: opencv-python 5.0.0.93 ships with an empty cv2/data/ directory (no
+# Haar cascade XML files), breaking deepface's default OpenCV face detector at runtime
+# with "Confirm that opencv is installed on your environment!". 4.10.0.84 is a
+# well-established release that still bundles the cascade data deepface needs.
+opencv-python==4.10.0.84
+# deepface's face-detection backend (retinaface) needs the legacy Keras 2 API; modern
+# tensorflow (2.16+) ships Keras 3 by default, causing "requires tf-keras package" at
+# import time without this explicit compatibility shim installed alongside it.
+tf-keras
