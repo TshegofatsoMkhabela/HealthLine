@@ -30,19 +30,22 @@ public class EmbeddingStore {
    * fresh one — a single idNumber lookup either way, rather than a separate "decide identityId"
    * query followed by another "fetch for update" query.
    *
-   * <p>The find-then-insert isn't atomic (two concurrent enrolls for the same idNumber — e.g. a
-   * client retry after a slow response — can both see "not found" and both attempt to insert). The
-   * DB's UNIQUE(id_number) constraint stops that from ever creating a duplicate row; the catch
-   * below turns the losing request's constraint violation into the same successful outcome the
-   * winning request got, instead of a raw 500.
+   * <p>{@code @Transactional} keeps the read and write below in one Hibernate session and one DB
+   * connection — it does NOT close the race window (Postgres's default READ COMMITTED isolation
+   * still lets two concurrent calls both see "not found" before either commits). The find-then-insert
+   * still isn't atomic (two concurrent enrolls for the same idNumber — e.g. a client retry after a
+   * slow response — can both see "not found" and both attempt to insert). What actually stops a
+   * duplicate row is the DB's UNIQUE(id_number) constraint; the catch below turns the losing
+   * request's constraint violation into the same successful outcome the winning request got,
+   * instead of a raw 500.
    */
   @Transactional
   public String enrollOrReenroll(String idNumber, List<Double> embedding) {
     Optional<IdentityEmbedding> existing = repository.findByIdNumber(idNumber);
     if (existing.isPresent()) {
-      // existing is detached by the time we get here (a separate call from the read above),
-      // so the mutation needs an explicit save() to persist — dirty-checking only works within
-      // one still-open Hibernate session, which this isn't.
+      // existing stays attached for the rest of this transaction, so dirty-checking alone
+      // would flush this mutation at commit — the explicit save() below is kept anyway as
+      // a clear, immediate signal of intent rather than relying on flush timing.
       IdentityEmbedding identity = existing.get();
       identity.updateEmbedding(embedding);
       repository.save(identity);
