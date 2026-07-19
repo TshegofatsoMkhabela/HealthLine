@@ -50,18 +50,27 @@
       };
 
       document.getElementById("enrollBtn").onclick = async () => {
-        const idNumber = document.getElementById("idNumber").value;
-        const selfieBlob = captureFrameAsBase64(enrollVideo);
+        const enrollBtn = document.getElementById("enrollBtn");
+        // Real face-embedding inference takes several real seconds — without this,
+        // an impatient double-click sends two enroll requests close enough together
+        // to race each other server-side.
+        enrollBtn.disabled = true;
+        try {
+          const idNumber = document.getElementById("idNumber").value;
+          const selfieBlob = captureFrameAsBase64(enrollVideo);
 
-        const response = await fetch("/api/identity/enroll", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idNumber, selfieBlob }),
-        });
-        const body = await response.json();
-        document.getElementById("enrollResult").textContent = JSON.stringify(body, null, 2);
-        if (body.identityId) {
-          document.getElementById("identityId").value = body.identityId;
+          const response = await fetch("/api/identity/enroll", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idNumber, selfieBlob }),
+          });
+          const body = await response.json();
+          document.getElementById("enrollResult").textContent = JSON.stringify(body, null, 2);
+          if (body.identityId) {
+            document.getElementById("identityId").value = body.identityId;
+          }
+        } finally {
+          enrollBtn.disabled = false;
         }
       };
 
