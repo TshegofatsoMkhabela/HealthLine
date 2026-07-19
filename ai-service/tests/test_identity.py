@@ -21,7 +21,10 @@ def test_compare_returns_match_true_for_same_person_under_threshold(client):
     with patch("app.identity.compute_embedding", return_value=SAME_PERSON_EMBEDDING_B):
         response = client.post(
             "/identity/compare",
-            json={"selfieBlob": VALID_SELFIE, "storedEmbedding": SAME_PERSON_EMBEDDING_A},
+            json={
+                "selfieBlob": VALID_SELFIE,
+                "storedEmbedding": SAME_PERSON_EMBEDDING_A,
+            },
         )
 
     assert response.status_code == 200
@@ -31,10 +34,15 @@ def test_compare_returns_match_true_for_same_person_under_threshold(client):
 
 
 def test_compare_returns_match_false_for_different_person_at_or_above_threshold(client):
-    with patch("app.identity.compute_embedding", return_value=DIFFERENT_PERSON_EMBEDDING):
+    with patch(
+        "app.identity.compute_embedding", return_value=DIFFERENT_PERSON_EMBEDDING
+    ):
         response = client.post(
             "/identity/compare",
-            json={"selfieBlob": VALID_SELFIE, "storedEmbedding": SAME_PERSON_EMBEDDING_A},
+            json={
+                "selfieBlob": VALID_SELFIE,
+                "storedEmbedding": SAME_PERSON_EMBEDDING_A,
+            },
         )
 
     assert response.status_code == 200
