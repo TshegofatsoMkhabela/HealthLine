@@ -1,6 +1,7 @@
 // Handles saving the two-payload medical profile and the doctor sign-off
 // step. In production the triage + full record payloads would be encrypted
 // on-device (POPIA requirement) — this mock just simulates the round trip.
+import { wait } from "./mockNetwork";
 
 export async function saveProfile({ triage, fullRecord }) {
   await wait(600);
@@ -19,8 +20,4 @@ export async function requestDoctorSignOff({ hpcsaNumber }) {
     signedBy: `Dr. (HPCSA ${hpcsaNumber})`,
     signedAt: new Date().toISOString(),
   };
-}
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

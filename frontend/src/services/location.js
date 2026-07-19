@@ -1,6 +1,7 @@
 // Real what3words integration: call their REST API directly, e.g.
 //   GET https://api.what3words.com/v3/convert-to-coordinates?words=...&key=...
 // Kept mocked here so the frontend doesn't depend on a live API key yet.
+import { wait } from "./mockNetwork";
 
 export async function resolveWhat3Words(words) {
   await wait(700);
@@ -43,8 +44,4 @@ export async function getIndoorPosition() {
     floor: floors[Math.floor(Math.random() * floors.length)],
     room: rooms[Math.floor(Math.random() * rooms.length)],
   };
-}
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

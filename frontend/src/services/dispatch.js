@@ -2,6 +2,7 @@
 // ambulance is available nearby, otherwise a structured report to the
 // 10177 public dispatcher dashboard. Also simulates the ETA ticking down
 // and the hospital load-balancer decision.
+import { wait } from "./mockNetwork";
 
 export async function routeEmergency({ priorityCode, coords }) {
   await wait(1000);
@@ -34,8 +35,4 @@ export async function findAcceptingHospital() {
     { name: "Steve Biko Academic Hospital", status: "accepting", distanceKm: 9.1 },
   ];
   return { ok: true, hospitals, selected: hospitals.find((h) => h.status === "accepting") };
-}
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

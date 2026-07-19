@@ -1,6 +1,7 @@
 // Converts rapid tap-answers into a standard priority code. A real build
 // would send { answers } to an AI triage endpoint — this mock applies
 // simple rules so the demo flow is deterministic and explainable live.
+import { wait } from "./mockNetwork";
 
 export const TRIAGE_QUESTIONS = [
   { id: "conscious", label: "Is the patient conscious?" },
@@ -22,8 +23,4 @@ export async function scorePriority(answers) {
     return { ok: true, code: "Code Amber", label: "Serious, Stable" };
   }
   return { ok: true, code: "Code Green", label: "Minor / Stable" };
-}
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
