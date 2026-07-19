@@ -34,10 +34,12 @@ class IdentityController {
       return ResponseEntity.ok(EnrollResponse.rejected(result.reason()));
     }
 
-    Optional<List<Double>> embedding = callAiService(() -> aiServiceClient.embed(request.selfieBlob()));
+    Optional<List<Double>> embedding =
+        callAiService(() -> aiServiceClient.embed(request.selfieBlob()));
     if (embedding.isEmpty()) {
       String reason = "Identity service temporarily unavailable — try again shortly.";
-      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(EnrollResponse.error(reason));
+      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+          .body(EnrollResponse.error(reason));
     }
 
     // Re-enrollment by the same real person (same idNumber) reuses their existing
@@ -64,11 +66,13 @@ class IdentityController {
     Optional<CompareResult> result =
         callAiService(() -> aiServiceClient.compare(request.selfieBlob(), storedEmbedding.get()));
     if (result.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(RecheckResponse.serviceUnavailable());
+      return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+          .body(RecheckResponse.serviceUnavailable());
     }
 
     return ResponseEntity.ok(
-        RecheckResponse.result(request.identityId(), result.get().match(), result.get().distance()));
+        RecheckResponse.result(
+            request.identityId(), result.get().match(), result.get().distance()));
   }
 
   /** ai-service being briefly unreachable (cold start, network blip) is expected, not a bug. */

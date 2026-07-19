@@ -3,7 +3,8 @@ package com.healthline.backend.identity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-record EnrollResponse(String identityId, String status, String verifiedAt, String verifier, String reason) {
+record EnrollResponse(
+    String identityId, String status, String verifiedAt, String verifier, String reason) {
 
   static EnrollResponse rejected(String reason) {
     return new EnrollResponse(null, "rejected", null, null, reason);

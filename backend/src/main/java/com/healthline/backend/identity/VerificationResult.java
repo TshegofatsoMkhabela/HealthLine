@@ -4,8 +4,8 @@ import java.time.Instant;
 
 /**
  * Result of an identity verification attempt. {@code verifier} always identifies which
- * implementation produced this result ("MOCK" or "smile_id"), so no caller can mistake a
- * mocked result for a real one without it being visible in the data itself.
+ * implementation produced this result ("MOCK" or "smile_id"), so no caller can mistake a mocked
+ * result for a real one without it being visible in the data itself.
  */
 public record VerificationResult(boolean ok, String verifier, Instant verifiedAt, String reason) {
 

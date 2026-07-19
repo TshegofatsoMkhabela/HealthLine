@@ -24,9 +24,9 @@ public class EmbeddingStore {
   }
 
   /**
-   * Finds the identity already enrolled under this idNumber and updates its embedding, or
-   * creates a fresh one — a single idNumber lookup either way, rather than a separate
-   * "decide identityId" query followed by another "fetch for update" query.
+   * Finds the identity already enrolled under this idNumber and updates its embedding, or creates a
+   * fresh one — a single idNumber lookup either way, rather than a separate "decide identityId"
+   * query followed by another "fetch for update" query.
    */
   public String enrollOrReenroll(String idNumber, List<Double> embedding) {
     return repository

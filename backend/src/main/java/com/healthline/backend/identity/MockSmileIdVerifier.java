@@ -4,8 +4,8 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Component;
 
 /**
- * Stands in for Smile ID's Enhanced KYC sandbox until real credentials are available.
- * See specs/SPEC-login-biometrics-ekyc.md — the real SmileIdClient is an open item.
+ * Stands in for Smile ID's Enhanced KYC sandbox until real credentials are available. See
+ * specs/SPEC-login-biometrics-ekyc.md — the real SmileIdClient is an open item.
  */
 @Component
 public class MockSmileIdVerifier implements IdentityVerifier {
