@@ -57,6 +57,12 @@ describe("getBrowserLocation", () => {
     });
   }
 
+  // Mirrors the real GeolocationPositionError shape: all three code constants
+  // are always present on the error object, not just the one that fired.
+  function geolocationError(code) {
+    return { code, PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 };
+  }
+
   it("returns the reading with the lowest accuracy value after sampling multiple readings", async () => {
     const resultPromise = getBrowserLocation();
 
@@ -95,10 +101,31 @@ describe("getBrowserLocation", () => {
   it("resolves immediately with a specific reason when permission is denied, without waiting out the sampling window", async () => {
     const resultPromise = getBrowserLocation();
 
-    errorCallback({ code: 1, PERMISSION_DENIED: 1 });
+    errorCallback(geolocationError(1));
     const result = await resultPromise;
 
     expect(result).toEqual({ ok: false, reason: "Location permission denied." });
     expect(clearWatchSpy).toHaveBeenCalledWith(1);
+  });
+
+  it("resolves immediately when position is unavailable (e.g. location services off), not just on permission denial", async () => {
+    const resultPromise = getBrowserLocation();
+
+    errorCallback(geolocationError(2));
+    const result = await resultPromise;
+
+    expect(result).toEqual({ ok: false, reason: "Could not get a location fix." });
+    expect(clearWatchSpy).toHaveBeenCalledWith(1);
+  });
+
+  it("keeps sampling (does not short-circuit) on a per-callback TIMEOUT error", async () => {
+    const resultPromise = getBrowserLocation();
+
+    errorCallback(geolocationError(3));
+    emit(20);
+    await vi.runAllTimersAsync();
+
+    const result = await resultPromise;
+    expect(result).toEqual({ ok: true, coords: { lat: -26.1, lng: 28.05 }, accuracy: 20 });
   });
 });

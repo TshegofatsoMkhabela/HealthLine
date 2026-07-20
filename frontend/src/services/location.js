@@ -46,13 +46,19 @@ export async function getBrowserLocation() {
         }
       },
       (err) => {
-        // PERMISSION_DENIED is definitive and non-transient — waiting out the
-        // rest of the sampling window before telling the user would just be a
-        // silent multi-second stall for no benefit. Other error codes (no
-        // fix yet, per-call timeout) are expected sampling noise: a later
-        // reading can still succeed, so those are swallowed as before.
-        if (err.code === err.PERMISSION_DENIED) {
-          finish({ ok: false, reason: "Location permission denied." });
+        // Every error code except TIMEOUT is definitive and non-transient
+        // (permission denied, or position unavailable e.g. location services
+        // off system-wide) — waiting out the rest of the sampling window
+        // before telling the user would just be a silent multi-second stall
+        // for no benefit. TIMEOUT alone is expected sampling noise (this
+        // particular watchPosition callback didn't get a fix in time, but a
+        // later one still can), so that's the only code still swallowed.
+        if (err.code !== err.TIMEOUT) {
+          const reason =
+            err.code === err.PERMISSION_DENIED
+              ? "Location permission denied."
+              : "Could not get a location fix.";
+          finish({ ok: false, reason });
         }
       },
       // This timeout bounds a single watchPosition callback, not the overall
