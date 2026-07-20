@@ -31,6 +31,8 @@ const initialState = {
     status: "idle", // idle | locating | locked
     what3words: null,
     coords: null,
+    accuracy: null, // meters, from the last GPS fix (trusted or not)
+    plusCode: null, // set only when accuracy was within the trust threshold
     indoorMode: false,
     indoorPosition: null, // { floor, room }
   },
