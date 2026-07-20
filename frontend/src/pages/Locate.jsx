@@ -2,7 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Map, { Marker } from "react-map-gl/mapbox";
 import { useApp } from "../state/AppContext";
-import { resolveWhat3Words, getBrowserLocation, getIndoorPosition } from "../services/location";
+import {
+  resolveWhat3Words,
+  getBrowserLocation,
+  getIndoorPosition,
+  generatePlusCode,
+  isAccurateEnough,
+} from "../services/location";
 import Card from "../components/Card";
 import PageHeader from "../components/PageHeader";
 
@@ -19,15 +25,28 @@ export default function Locate() {
 
   const lockGps = async () => {
     setBusy(true);
+    setError(null);
     update("location.status", "locating");
     const result = await getBrowserLocation();
-    if (result.ok) {
-      update("location.coords", result.coords);
-      update("location.status", "locked");
-    } else {
+    if (!result.ok) {
       setError(result.reason);
       update("location.status", "idle");
+      setBusy(false);
+      return;
     }
+    if (!isAccurateEnough(result.accuracy)) {
+      setError(
+        `GPS fix is only accurate to ${Math.round(result.accuracy)}m — try what3words instead for a precise location.`,
+      );
+      update("location.accuracy", result.accuracy);
+      update("location.status", "idle");
+      setBusy(false);
+      return;
+    }
+    update("location.coords", result.coords);
+    update("location.accuracy", result.accuracy);
+    update("location.plusCode", generatePlusCode(result.coords));
+    update("location.status", "locked");
     setBusy(false);
   };
 
@@ -112,6 +131,9 @@ export default function Locate() {
         >
           Use GPS
         </button>
+        {state.location.status === "locating" && (
+          <p className="text-xs text-mist font-mono animate-pulse">Locating you precisely…</p>
+        )}
 
         <div className="flex gap-2">
           <input
