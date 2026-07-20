@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../state/AppContext";
-import { saveProfile } from "../services/profile";
+import { saveProfile, loadProfile } from "../services/profile";
 import Card from "../components/Card";
 import PageHeader from "../components/PageHeader";
 
@@ -25,6 +25,19 @@ export default function ProfileBuilder() {
   const [triage, setTriage] = useState(state.profile.triage);
   const [fullRecord, setFullRecord] = useState(state.profile.fullRecord);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+
+  useEffect(() => {
+    loadProfile()
+      .then(({ triage: savedTriage, fullRecord: savedFullRecord }) => {
+        if (savedTriage) setTriage(savedTriage);
+        if (savedFullRecord) setFullRecord(savedFullRecord);
+      })
+      .catch((error) => {
+        console.error("Failed to load saved profile:", error);
+        setLoadError("Couldn't load your saved profile — starting from a blank form.");
+      });
+  }, []);
 
   const setT = (key) => (val) => setTriage((prev) => ({ ...prev, [key]: val }));
   const setF = (key) => (val) => setFullRecord((prev) => ({ ...prev, [key]: val }));
@@ -45,6 +58,8 @@ export default function ProfileBuilder() {
         title="Build your medical profile"
         subtitle="Stored encrypted, on your device only — POPIA compliant by design."
       />
+
+      {loadError && <p className="text-sm text-signal-red">{loadError}</p>}
 
       <Card className="flex flex-col gap-4">
         <p className="text-xs font-mono uppercase tracking-wide text-signal-amber">
